@@ -1,4 +1,3 @@
-## 第一章  
 ### 概述  
 1.ECMAScript（ES）是 JavaScript 的语法标准  
 2.前端JS的组成：ECMAScript（核心语言，不可替代）；BOM--浏览器（宿主对象，可替代）；DOM--文档对象模型（宿主对象，可替代）  
@@ -10,23 +9,29 @@
 8.JS语言特点：直译式脚本语言；弱类型、动态类型语言；  
 ### 数据类型以及存储转换  
 #### 数据类型
-1.ES5 数据类型（6种）及其划分（2类）：基本（原始）类型（Number、String、Boolean、Null、Undefined）；引用（对象）类型（Object（Array、Function、Date、String等））  
-2.typeof：返回一个字符串，表示未经计算的操作数的类型。如a为number，b为string a+b后，a的类型仍为number。typeof operand  或者  typeof (operand)，其中括号可选  
-3.函数如果没有return，则返回值类型为undefined  
+1. ES5 数据类型（6种）及其划分（2类）：基本（原始）类型（Number、String、Boolean、Null、Undefined）；引用（对象）类型（Object（Array、Function、Date、String等））  
+2. typeof：返回一个字符串，表示未经计算的操作数的类型。如a为number，b为string a+b后，a的类型仍为number。typeof operand  或者  typeof (operand)，其中括号可选  
+3. 函数如果没有return，则返回值类型为undefined  
+4. JavaScript 有七种内置类型：  
+• 空值（null） • 未定义（undefined） • 布尔值（ boolean） • 数字（number） • 字符串（string） • 对象（object） • 符号（symbol，ES6 中新增） 除对象之外，其他统称为“基本类型”。   
+5. typeof null === "object"; // true  
+6. 数组也是对象。  
+7. JavaScript 中的变量是没有类型的，只有值才有。变量可以随时持有任何类型的值。  
+
 #### 变量与内存  
-1.一般来说，系统会划分出两种不同的内存空间：  
+1. 一般来说，系统会划分出两种不同的内存空间：  
 ①栈内存（stack）：存储的值大小固定；由系统自动分配内存空间；空间小，运行效率高  
 ②堆内存（heap）：存储的值大小不定，可动态调整；由程序员通过代码进行分配；空间大，运行效率相对较低  
-2.基本类型的变量是存放在栈区的，基本类型的值不可变（如：var a="abc"; a.toUpperCase(); console.log(a);//仍为"abc")；基本类型的值直接访问（运行速率快）；基本类型复制---相互独立互不影响  
+2. 基本类型的变量是存放在栈区的，基本类型的值不可变（如：var a="abc"; a.toUpperCase(); console.log(a);//仍为"abc")；基本类型的值直接访问（运行速率快）；基本类型复制---相互独立互不影响  
 引用类型的值是同时保存在栈内存和堆内存中的对象，值可变。如 【var person = {name:'Lily'}; 其中堆区存放的是（具体值）该对象{name:'Lily'}，栈区存放的是变量person在堆区的地址 】；引用类型的值通过引用访问，不能直接访问（运行速率慢）  
-3.基本数据类型与引用类型的比较：值类型是判断变量的值是否相等（值比较）；引用类型是判断所指向的内存空间（地址）是否相同（引用比较）  
-4.ECMAScript 中所有函数的参数都是按值来传递的  
-5.基本类型值：把变量里的数据值传递给参数，之后参数和变量互不影响。  
+3. 基本数据类型与引用类型的比较：值类型是判断变量的值是否相等（值比较）；引用类型是判断所指向的内存空间（地址）是否相同（引用比较）  
+4. ECMAScript 中所有函数的参数都是按值来传递的  
+5. 基本类型值：把变量里的数据值传递给参数，之后参数和变量互不影响。  
 引用类型值：把对象的引用（地址）值传递给参数，参数和对象都指向同一个对象，相互影响。  
 ### 类型转换  
-1.隐式类型转换：通常是某些操作的副作用，不易看出  
-2.显示类型转换：可以在代码中明显看出  
-3.规则：  
+1. 隐式类型转换：通常是某些操作的副作用，不易看出  
+2. 显示类型转换：可以在代码中明显看出  
+3. 规则：  
 ①转为Number：undefined-->NaN;null-->0; 强制转为number：parseInt()、parseFloat()、Number()  
 NaN(Not a Number)NaN!=NaN；console.log( typeof  NaN);//number  
 isNaN( ) 函数用来检测参数是否为 NaN 值，参数是 "NaN" 时返回 true，否则返回 false  
@@ -36,6 +41,11 @@ isNaN( ) 函数用来检测参数是否为 NaN 值，参数是 "NaN" 时返回 t
 运算符等级相同时，从左往右计算（var a=1; var b="2"; var c=3;则a+c+b=42）  
 ③转换为Boolean：undefined，null，NaN,"" 均是false；强制转换：Boolean（）  
 逻辑运算符会将数据类型转换为布尔类型之后再做运算  
+## 数组  
+1. 在 JavaScript 中，数组可以容纳任何类型的值，可以是字符串、 数字、对象（object），甚至是其他数组，对数组声明后即可向其中加入值，不需要预先设定大小  
+2. var a = [ ]; a.length; // 0   
+3. 使用 delete 运算符可以将单元从数组中删除，但是请注意，单元删除后，数 组的 length 属性并不会发生变化。  
+
 
 
 
