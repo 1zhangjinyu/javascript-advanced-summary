@@ -20,7 +20,7 @@ instanceof用于对象。如果value是一个通过Constr构造器创建的对�
 7. JavaScript 中的变量是没有类型的，只有值才有。变量可以随时持有任何类型的值。  
 8. 变量在未持有值的时候为 undefined。此时 typeof 返回 "undefined"；还没有在作用域中声明 过的变量，是 undeclared 的。undefined 是值的一种。undeclared 则表示变量还没有被声明过  
 
-#### 类型转换  
+#### 基本数据类型转换  
 1. 隐式类型转换：通常是某些操作的副作用，不易看出  
 2. 显示类型转换：可以在代码中明显看出  
 3. 规则：  
@@ -33,11 +33,59 @@ isNaN( ) 函数用来检测参数是否为 NaN 值，参数是 "NaN" 时返回 t
 运算符等级相同时，从左往右计算（var a=1; var b="2"; var c=3;则a+c+b=42）  
 ③转换为Boolean：undefined，null，NaN,"" 均是false；强制转换：Boolean（）  
 逻辑运算符会将数据类型转换为布尔类型之后再做运算  
+对象-->Number：对象会先转换为原始值，然后再转换为数字/String  
+#### 包装对象和数据类型转换  
+（一） 包装对象  
+1. 例：  
+var flag = true;  
+var sign = flag.toString();//等价于var sign=(new Boolean(flag)).toString(true);包装对象  
+console.log(sign, typeof sign); //true,string  
+存取字符串、数字或布尔值的属性时创建的临时对象称为包装对象，而undefined、null没有包装对象，也因此没有toString（）方法。包装对象用来处理属性的引用，一旦属性引用结束，包装对象就会销毁  
+例：【引用str字符串的属性和方法，JavaScript就会将字符串值通过调用 new String(str)的方式转换为对象，这个对象继承了字符串的方法，并被用来处理属性的引用。一旦属性引用结束，这个创建的对象就会销毁。】  
+var str="hello";  
+str.charAt(0);//创建包装对象     
+str.name="STRING";//创建包装对象，代码运行结束后，包装对象就被销毁  
+console.log(str.name);//undefined,而且与上面一行不是同一个包装对象  
+（二） 数据类型转换  
+1. 转换为 Object 类型：对象转换为自身；undefined 和 null 转换为空对象 {}；string/number/boolean 转换为包装对象。强制转换：Object()；  
+2. Object 转换为 Number：先调用 valueOf() 方法，结果为原始值，返回；再调用 toString() 方法，结果为原始值，返回；原始值转换为 Number 类型  
+如：[] --> 0; [2] --> 2; [2,3] --> NaN; {} --> NaN;  
+var a={};//undefined  
+Number(a);//NaN  
+a.valueOf();//{}  
+a.valueOf().toString();//"[object Object]"  
+Number(a.valueOf().toString());//NaN  
+3. Object转换为 String：先调用 toString() 方法，结果为原始值，返回；再调用 valueOf() 方法，结果为原始值，返回；原始值转换为 String 类型  
+如：[] --> ""; [3] --> "3"; [1,2,3] --> "1,2,3"; {} --> "[object Object]"; function(){} --> "function(){}"  
+4. Object 转换为 Boolean：任意对象转换为布尔值为 true，包括空对象  
+【注：在 JavaScript 中，真值（truthy）指的是在强制转换布尔值时，转换后的值为真的值。所有值都是真值，除非它们被定义为假值（falsy）（即除 false、0、""、null、undefined 和 NaN 以外皆为真值）】  
+（三） 总结  
+1. undefined == null，结果是true。且它俩与所有其他值比较的结果都是false。  
+2. String == Boolean，需要两个操作数同时转为Number。  
+3. String/Boolean == Number，需要String/Boolean转为Number。  
+4. Object == Primitive，需要Object转为Primitive（即将操作数转为原始类型的值，具体通过valueOf和toString方法）  
+5. 要将任意值转换为数字或者字符串，首先会被转换为任意的原始值，然后再转换为最终的结果  
+6. valueOf的默认实现会返回this,而toString ()的默认实现会返回类型信息  
+7. ToPrimitive(input, PreferredType?)  
+可选参数PreferredType表明转换后的类型:它可以是Number或String,具体取决于ToPr imitive的结果是希望转换成数字还是字符串。
+如果PreferredType是Number，会执行以下步骤。  
+(1)如果input是原始值，返回这个值(没有其他需要做的)。  
+(2)否则，如果input是对象，调用input. value0f()。如果结果是原始值，返回结果。  
+(3)否则，调用input. toString()。如果结果是原始值，返回结果。  
+(4)否则，抛出一个TypeError (说明将输入转换为原始值出错了)。  
+如果PreferredType是字符串，第二步和第三步会进行交换。PreferredType 也可以被省略，这种情况下，日期会被认为是String而其他值会被认为是Number。因此,+运算符和===运算符可以操作ToPrimitive()。  
+（四） 注  
+1. 分析 console.log([] == []) 输出的值  
+两个值都是对象 (引用值) 时，比较的是两个引用值在内存中是否是同一个对象。 虽然左操作数和右操作数同为空数组， 但此 [] 非彼 []，在内存中是两个互不相关的空数组， 所以结果为 false。  
+2. 分析 console.log([] == ![]) 输出的值  
+①等号右边有 ! ，优先级比 == 更高，优先计算右边的结果。 [] 为非假值，所以右边的运算结果为 false，即：![] ==> false
+② == 的两边分别是 object 和 boolean 类型的值，把 object 转换成 number 类型，需要对 object 进行 ToNumber 操作，即Number([].valueOf()) ==> 0；boolean 类型的值时先把这个值转换成 number 类型，右边转换成了 0，即Number(false) ==> 0。  
+
 #### 变量与内存  
 1. 一般来说，系统会划分出两种不同的内存空间：  
 ①栈内存（stack）：存储的值大小固定；由系统自动分配内存空间；空间小，运行效率高  
 ②堆内存（heap）：存储的值大小不定，可动态调整；由程序员通过代码进行分配；空间大，运行效率相对较低  
-2. 基本类型的变量是存放在栈区的，基本类型的值不可变（如：var a="abc"; a.toUpperCase(); console.log(a);//仍为"abc")；基本类型的值直接访问（运行速率快）；基本类型复制---相互独立互不影响  
+2. 基本类型的变量是存放在栈区的，基本类型的值不可变（如：var a="abc"; a.toUpperCase(); console.log(a);//仍为"abc")，其属性不能改变、添加或移除；基本类型的值直接访问（运行速率快）；基本类型复制---相互独立互不影响  
 引用类型的值是同时保存在栈内存和堆内存中的对象，值可变。如 【var person = {name:'Lily'}; 其中堆区存放的是（具体值）该对象{name:'Lily'}，栈区存放的是变量person在堆区的地址 】；引用类型的值通过引用访问，不能直接访问（运行速率慢）  
 3. 基本数据类型与引用类型的比较：值类型是判断变量的值是否相等（值比较）；引用类型是判断所指向的内存空间（地址）是否相同（引用比较）  
 4. ECMAScript 中所有函数的参数都是按值来传递的  
@@ -71,7 +119,27 @@ null 是一个特殊关键字，不是标识符，我们不能将其当作变量
 1. 实参>形参----额外的参数会被忽略（arguments除外），实参<形参，丢失的参数是undefined  
 2. 闭包：函数以及它所连接的周围作用域中的变量即为闭包。  
 
+### 值  
+#### JS中的类型体系  
+1. 在编程语言的语义和类型体系环境中，静态一般是指“编译时”或者“非运行时”,动态指的是“运行时”。  
+2. JS是动态类型的语言，变量的类型在编译的时候是不确定的。  
+3. 静态类型检查语言会在编译期间进行检查，动态类型检查语言会在执行期间进行检查。  
+4. JavaScript内置的转换机制只支持布尔值、数字、字符串和对象。没有标准的方法将某个构造函数的实例转换为另一个构造函数的实例。  
+#### 原始值和对象  
+1. 每一个对象有唯一的标识符并且只和自身相等  
+例：var obj3=obj1;   obj3===obj1;//true  
+相反，所有的原始值，只要编码相同，则被认为相等  
+2. var a='abc'; a.length=1; console.log(a.length);//仍为3  
+3. 对象的特点：①按引用进行比较，如：{}==={} --> false。②默认可变。③用户可扩展  
+#### undefined和null  
+1. undefined表示“ 没有值”(既不是原始值也不是对象)。访问未初始化的变量、缺失的参数，以及缺失的属性会返回这个空值。并且如果函数中没有任何显式的返回值时，则会隐式地返回undefined.  
+2. null的意思是“没有对象”。在用到对象的时候它表示空值( 比如参数、对象链中的最后一个元素等)。  
+3. 检测null或undefined：①用if(x===null); if(x===undefined);②大多数函数允许使用undefined或null来表示缺省值。③另一种检测方式是利用undefined和null都可被认为是false的特性  
+#### 原始值的包装对象  
+1. 通过调用包装构造函数来对原始值进行包装：new Number(123)；通过调用valueOf()来对原始值进行去包装：new Boolean(123).valueOf()  
+2. 将包装对象转换为原始值是只能正确的提取出数字和字符串，而布尔值不能  
 
+### 语法  
 1. 等于号的两种不同用法：①一个单独的等于号，用于为变量赋值；②三个连续的等号，用于比较两个值  
 2. JS中的两种注释：单行注释：由//开始；多行注释：/* */  
 3. 每个对象都有唯一的标识且只等于自己（所有的非基本数据类型外，都是对象）  
