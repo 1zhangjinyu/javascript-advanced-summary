@@ -307,7 +307,7 @@ void 0 等同于undefined
 （对象运算符）  
 new delete in    
   
-#### 语句  
+### 语句  
 ①语句（statement）  
  语句是为了完成某种任务而进行的操作，比如赋值语句  
  JavaScript 应用程序是由许多语法正确的语句组成的  
@@ -317,10 +317,37 @@ new delete in
  而表达式则是为了得到返回值，一定会返回一个值    
 1. JavaScript 中的多条语句联合在一起，形成一条复合语句。用花括号将多条语句括起来——语句块  
 2. 通常，语句都是以分号结束。语句块的结束不需要分号  
-（循环语句）  
-1. break 跳出整个循环；continue 跳出本地的循环体，立即进入下次的循环体
-p178
-
+#### 循环语句  
+1. break 跳出整个循环；continue 跳出本地的循环体，立即进入下次的循环体  
+①while（条件）  
+   语句  
+如果条件满足，就会一直循环语句，如果条件永远是真，将会产生一个无限的循环  
+②do-while循环：  
+  do（语句）  
+    while（条件）  
+首先至少会执行一次statement，接下来看条件是否是true来判断是否执行语句  
+③for循环  
+④for-in   可遍历一个对象中所有的键值，如果某个键值是不可枚举的，则会被忽略。遍历属性时，属性可以被删除  
+不要使用for-in来遍历数组。for-in只会遍历索引，而不是数组元素；for-in还会被遍历所有的属性值。因此最好使用for循环或者数组的forEach（）方法  
+⑤for each-in  只在Firefox中有效  
+#### 条件语句  
+1. if-then-else  
+链式if语句（else if）  
+2. switch  
+先执行switch后的语句，再根据其结果与每条case中的label比较来判断要跳到哪个case语句，如果没有匹配的，就执行default中的语句（判断进入哪一个case是通过===来比较）  
+3. with语句  
+with（object）  
+   语句  
+ 会将object的属性转变为本地变量提供给语句那部分，如：  
+ var obj={first:'john'};  
+ with(obj){  
+   console.log('hello '+first);//hello john  
+ }  
+ 往往用于避免过于冗余的对象调用。with语句已被遗弃  
+ 4. debugger语句  
+ 如果执行了一个debugger语句，这个语句会报一个断点；如果执行不到，不会发生任何事情  
+ 
+ 
 
 
 
