@@ -463,7 +463,7 @@ var f1 = function f2() {
  };  
  f1();//f2  
         f2  
-  
+    
       var f1 = function() {};
       console.log(f1.name);//f1
 
