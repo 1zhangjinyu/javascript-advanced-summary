@@ -528,19 +528,30 @@ var hasstrictMode = (function() { "use strict"; return this==undefined}());
 
 ### 函数定义和调用形式  
 1. 实参>形参----额外的参数会被忽略（arguments除外），实参<形参，丢失的参数是undefined  
-2. 闭包：函数以及它所连接的周围作用域中的变量即为闭包。
+2. 闭包：函数以及它所连接的周围作用域中的变量即为闭包。  
+3. JavaScript中函数的3种形式：  
+①非方法的函数  
+②构造器 通过new操作符来调用一个函数   
+③方法 将一个函数存储为一个对象的属性。 
+4. “形参”和“实参” 形参被用在定义函数时，实参在函数调用时被使用    
 #### 函数定义形式  
 1. 函数是什么？函数是可以通过外部代码调用的一个“子程序”。一个函数由称为函数体的一系列语句组成。值可以传递给一个函数，函数将返回一个值。  
 2. 函数定义方式  
- 通过函数声明的形式来定义  
- 通过函数表达式的形式来定义  
- 通过 Function 构造函数实例化的形式来定义  
+ （1）通过函数声明的形式来定义  
+      函数声明定义了一个新的变量，创建了一个函数对象，并将对象赋值给这个新的变量。  
+ （2）通过函数表达式的形式来定义  
+      函数表达式  
+      函数表达式的值可以赋给一个变量，可以作为传入别的函数的参数等。  
+      普通的函数表达式没有名字，称为匿名函数表达式。  
+      具名函数表达式：具名函数表达式的名字只能在函数表达式内部被访问。 
+ （3）通过 Function 构造函数实例化的形式来定义  
 3. 通过 Function 构造函数创建函数  
   可以传入任意数量的实参  
   最后一个实参为函数体  
   函数体中 javascript 语句之间分号隔开  
   Function 构造函数创建一个匿名函数  
-如：var max = new function("a","b","return a>b?a:b;");
+如：var max = new function("a","b","return a>b?a:b;");  
+Function构造器  执行传给它的JavaScript代码字符串。var add=new Function('x','y','return x+y')  
 4. 函数定义三要素：函数名、函数的参数、函数的返回值 （但都不是必须有）  
 5. ①匿名函数（如函数表达式，即没有函数名的函数）  
  单独的匿名函数是无法运行的  
@@ -578,6 +589,187 @@ var f1 = function f2() {
       console.log(f1.name);//anonymous  
 使用 new Function()语法的函数其名称为“anonymous”  
 8. length 属性：length 属性指明函数定义的形参个数  
+9. 函数提升   
+将函数的声明放到作用域的开始  
+①函数声明是完全提升的，所以在函数声明前可以进行函数调用。  
+②使用var的定义也会进行代码提升，但只对于声明有效，对于赋值过程是无效的。  
+10. 函数的名称  
+函数的声明会创建非标准的name属性，匿名函数表达式的name是一个空字符串，具名函数表达式也有一个name。  
+11. 哪个更好，函数声明还是函数表达式  
+   函数声明的优势  
+   ①函数声明会做代码提升，因此可以在源码中先于函数的定义来调用函数  
+   ②它们具有名字，不过，JavaScript引擎也在对匿名函数表达式的名字引用做优化。  
+#### arguments对象  
+1. JavaScript 函数在定义时有固定数目的命名参数，但当调用这个函数时，传递给它的参数数目却可以是任意的。  
+2. arguments对象：代表传入函数的实参；是函数中的局部变量；不能显式创建，只有函数调用时才可用；它是一个类数组对象.arguments的length属性表传入的实参数量，在调用时，实参个数确定， arguments.length确定，不会再发生改变  
+3. 类数组对象：与数组一样具有 length 与 index 属性；本质确实个 Object  
+4. arguments 与形参的“双向绑定”特性    
+①实参arguments数组和形参 a b c之间的关系  
+      function fun(a, b, c) {  
+        console.log(a, b, c);  
+        console.dir(arguments);  
+        console.log(a === arguments[0]); //true  
+        console.log(b === arguments[1]); //true  
+        console.log(c === arguments[2]); //true  
+      }  
+      var obj = { x: 1, y: 2 };  
+      fun(1, obj);  
+②修改第一个形参a 和实参arguments[0],观察之间的关系  
+      function fun(a, b, c) {  
+        console.log(a === arguments[0]); //true  
+        a = 2;  
+        console.log(a === arguments[0]); //true  
+        arguments[0] = 3;  
+        console.log(a === arguments[0]); //true  
+      }  
+      var obj = { x: 1, y: 2 };  
+      fun(1, obj);   
+③修改第二个形参b 和实参arguments[1],观察之间的关系  
+      function fun(a, b, c) {  
+        console.log(b === arguments[1]); //true  
+        b = [1, 2, 3];  
+        console.log(b === arguments[1]); //true  
+        arguments[1] = [2, 3, 4];  
+        console.log(b === arguments[1]); //true  
+      }  
+      var obj = { x: 1, y: 2 };  
+      fun(1, obj);   
+      console.log(obj);  //[2,3,4]  
+ ④修改第三个形参c 和实参arguments[2],观察之间的关系  
+      function fun(a, b, c) {  
+        console.log(c === arguments[2]); //true  
+        c = 2;  
+        console.log(arguments[2]);  
+        console.log(c === arguments[2]); //false  
+        arguments[2] = 3;  
+        console.log(c);  
+        console.log(c === arguments[2]); //false  
+      }  
+      var obj = { x: 1, y: 2 };  
+      fun(1, obj);  
+双向绑定特性：向函数传递参数时，arguments 数组中的对应单元会和命名参数建立关联（linkage）以得到相同的值。相反，不传递参数就不会建立关联  
+function fun(a, b, c) {  
+        console.log(arguments.length);  //2  
+        arguments[4] = 1;  
+        console.log(arguments.length); // arguments只与传入的实参有关系,2  
+        return a + b;  
+      }  
+      var obj = { x: 1, y: 2 };  
+      fun(1, obj);  
+在调用时 arguments 对象与实际传递了值的形参变量发生双向绑定  
+#### call/apply/bind方法  
+（ toString 方法：返回一个表示当前函数源代码的字符串。valueOf方法：返回函数本身）  
+（this关键字：在function内部被创建；指向调用时所在函数所绑定的对象；this 不能被赋值，this 的值取决于函数被调用的方式） 
+1. call方法  
+ 语法： fn.call(thisObj，arg1，arg2，...)  
+ 参数：arg1,arg2,...：被调用函数的实参（是一个参数序列）  
+      thisObj：将函数对象中的 this 指向 thisObj 对象  
+ 说明：1. 如果 thisObj 未传递，this 指向全局对象 window  
+      2. 如果传递为 undefined/null，this 指向全局对象 window  
+      3. 如果传递为数字，字符串，布尔值，this 指向该原始值的包装对象  
+ 返回值：与 fn 普通调用相同  
+ 作用：调用函数，并改变函数执行的 this 指向  
+2. apply（）方法  
+语法： fn.apply(thisObj，[arg1，arg2，...])（是一个参数数组）  
+其他用法均与call（）方法一样  
+【call()、apply()使用仍然是执行原来对象的方法里面的代码，只是代码中的this指向改变了。如果调用的对象方法里面没有this，那么使用call()和apply()没有任何改变，也没有意义  
+        var x = 100;  
+        var obj = {  
+            x: 50  
+        };  
+        var foo = {  
+            x: 0,  
+            getX: function () {  
+                return this.x;  
+            }  
+        };  
+        console.log(foo.getX()); //0  
+        console.log(foo.getX.call(obj)); //50  
+        console.log(foo.getX.apply(obj)); //50  
+        //call()、apply()没有指定对象时 默认指向全局对象（window）  
+        console.log(foo.getX.call()); //100  
+        console.log(foo.getX.apply()); //100  】  
+3.  bind () 方法  
+语法： fn.bind(thisObj，arg1，arg2,...)    
+参数： 当绑定函数调用时，thisObj 参数作为原函数运行时的 this 指向。  
+        arg1,arg2,...  当绑定函数被调用时，这些参数加上绑定函数本身的参数会按照顺序作为 原函数运行时的参数。（预设参数）  
+返回值：返回一个原函数的拷贝（绑定函数），并拥有指定的 this值和初始参数  
+ bind 不会调用函数，即不会执行原函数中的代码  
+4. 总结：  
+ apply，call，bind 三个方法第一个参数都是改变函数在调用时 this 指向的对象  
+ apply，call，bind  第一个参数为空，null，undefined，this 指向的是 window  
+ apply，call 两个方法只是参数形式有所不同，apply 参数是一个数组，call 参数则是列表序列  
+ apply，call 都会立即调用函数执行，bind 不会立即调用函数  
+5. 参数缺失或者超出时的处理  
+实参数量多于形参：多余的参数会被忽略，但是能在类数组的arguments中被获取到。  
+实参数量小于形参：缺失的形参都会被赋予undefined值。  
+①通过索引访问所有参数：神奇的arguments变量  
+arguments变量：只存在于函数中，是一个类数组对象，包含了当前函数调用的所有实参。  
+特征：它是类数组的，但又非数组。一方面，它有一个length属性，所有的参数都可以通过索引值来进行读写。 
+另一方面，arguments不是一个数组，仅仅是类似，并没有数组的方法。  
+它是一个对象，因此它支持所有的对象方法和操作。  
+arguments的废弃特性 。arguments. callee指向了当前调用的函数。它一般用于匿名函数的自递归调用，但是它在严格模式中是禁用的。  
+在非严格模式中，当改变一个参数，arguments会实时地变化，但是在严格模式中，并不支持这一特性。  
+严格模式禁用了对变量arguments的分配。  
+②强制性参数，限制参数数量的最小值  
+判断一个参数是否缺失：第一种，检测它的值是否为undefined。第二种，将参数转化为布尔值。undefined会被认为false。第三种，用arguments.length来检测并强制指定参数数量的最小值。  
+最后一种方式相比前两种有一些区别:  
+前两种方式无法区分foo ()和foo (undefined)。它们对于两种情况会抛一样的错误。  
+第三种方式会对foo()抛错,而对于foo (undefined)会正常使用undefined传入函数并调用。  
+③可选参数  
+四种处理可选参数的选择：第一种，检测undefined。第二种，将可选参数转换为布尔值。第三种，使用或运算符，如果左侧操作数不是false值，则返回左侧的操作数，否则将返回右侧的操作数。第四种，使用arguments.length来检测函数支持的最小数量的参数。  
+同样的，最后一种方式有别于其他的方式:  
+前三种方式无法区分bar (1,2)和bar (1, 2, undefined)。这两种情况下，opt ional的值都是默认值。  
+第四种方式对于bar (1,2)会使用默认值，而对于bar (1, 2, undefined)会保留undefined的传人。  
+④模拟参数的引用传递  
+在JavaScript中，不能传递参数的引用，当将一个变量传递给一 ？     
+#### 函数调用形式  
+1. 作为函数直接调用  
+2. 作为对象方法调用  
+3. 作为构造函数调用  
+4. 通过 call/apply 间接调用  
+
+
+
+ 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
