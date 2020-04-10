@@ -1302,6 +1302,432 @@ console.log( a );
 ②区分函数声明和表达式最简单的方法是看 function 关键字出现在声明中的位置  
 注：函数声明和函数表达式之间最重要的区别是它们的名称标识符将会绑定在何处。  
 
+## 对象与继承  
+JavaScript中的面向对象编程分为四层：  
+1.单一对象的面向对象  
+2.对象间的原型链  
+3.作为实例工厂的构造函数，类似于其他语言中的类  
+4.子类，通过继承已有的构造函数，创建新的构造函数  
+### 第一层
+#### 单一对象  
+1.属性的种类  
+①属性：对象中的普通属性，包括方法被称为数据属性。  
+②访问器：类似于读、写属性的特殊方法。属性的值存储在普通属性中，而访问器可以计算属性的值。  
+③内置属性：只存在于ECMAScript语言规范中。不能用JavaScript直接访问，但可以用简介的方式访问，规范将内置的键置于方括号中。  
+2.对象字面量：创建简单对象  
+var jane={  
+    name:'Jane',  
+    describe:function(){  
+      return 'person named'+this.name;  
+     },  
+    };  
+ ①在方法中使用this来指代当前对象  
+ ②ECMAScript5允许在对象字面量的最后一个属性之后跟一个逗号。
+ 3.点运算符  
+ ①获取属性 jane.name  
+ 获取一个不存在的属性会返回undefined  
+ ②调用方法 jane. describe()  
+ ③设置属性 使用赋值操作符(=)为点操作符指向的属性赋值。 jane.name='John'  
+ ④删除属性 delete操作符从一个对象中完全移除一个属性  
+ var obj={hello:'world'};  
+ delete obj.hello  
+ 删除只影响一个对象的直接属性，并不涉及它的原型。  
+ ⑤delete返回值  
+ 如果属性是自有属性，且不能被删除，delete会返回false，其他情况都返回true。  
+4.特殊的属性键  
+ ①不能使用保留字作为变量名，但可以使用他们作为属性的键。var obj={var:'a',function:'b'};  
+ ②在对象字面量中，数字也可以用来作为属性的键，但会被解析为字符串。 var obj={0.7:'abc'};  
+ ③对象字面量也可以使用任意字符串作为属性的键，但必须加上引号。 var obj={'not an identifier':123};  
+ 5.中括号操作符[]  
+ ①通过中括号操作符获取属性  
+ 通过表达式计算得出一个属性的键：  
+ var obj={someProperty:'abc'};  
+ obj['some'+'Property'] //'abc'  
+ var propkey='someProperty';  
+ obj[propkey] //'abc'   
+ 通过非标识符的键访问属性：  
+ var obj={'not an identifier':123}  
+ obj['not an identifier'] //123  
+ 中括号操作符强制括号中的内容转化为字符串：  
+ var obj={'6':'bar'};  
+ obj[3+3] //'bar'  
+ ②通过中括号操作符调用方法  
+ var obj = { myMethod: function () { return true } } ;  
+obj[ ' myMethod']( )  
+//true  
+③通过中括号操作符设置属性  
+varobj={};  
+obj[ ' anotherProperty'] = 'def' ;  
+obj. anotherProperty  
+//'def'  
+④通过中括号操作符删除属性  
+ var obj = { 'not an identifier': 1, prop: 2 };  
+object. keys(obj)  
+//[ 'not an identifier '，' prop' ]    
+ delete obj[ ' not an identifier ']  
+//true  
+object . keys(obj)  
+//['prop']  
+#### 把任意值转化为对象  
+Object():{}  
+Object(undefined):{}   
+Object(null):{}   
+Object(true/false):new Boolean(bool)  
+Object(数字num):new Number(num)  
+Object(字符串str):new String(str)  
+Object(对象obj):obj  
+#### this作为函数和方法的隐式参数  
+宽松模式中的普通函数：值总是指向全局对象  
+严格模式中的普通函数：this总是undefined  
+方法：this指向调用方法的对象  
+1.在调用函数时设置this  
+call() apply() bind()  
+①Function.prototype.call(thisValue,arg1,arg2...)  
+第一个参数会赋值给被调用函数内的this，剩下的参量作为参数传入被调函数。  
+②Function.prototype.apply(thisValue,argArray)    
+第一个参数会赋值给被调函数内的this，第二个参数是一个数组。  
+2.Function.prototype.bind(thisValue,arg1,arg2...)   
+this的值是thisValue，参数从arg1到argN，紧随其后的是新函数的参数。  
+注：数组方法slice用来把arguments转化为数组。  
+3.用于构造函数的apply()  
+①为构造函数手动模拟apply():  
+第一步：通过方法调用，把参数传给Date. new (Date.bind(null,2011,11,24));  
+第二步：使用apply()把数组传给bind(). new(Function.prototype.bind.apply(Date,[null,2011,11,24]));  
+②通过Object.create()创建未初始化的实例，然后通过apply()调用构造函数。  
+4.提取方法时丢失this：从一个对象中提取方法，这个方法又变成真正的函数，它与对象的连接被切断，不会再正常工作。  
+5.嵌套函数：一个方法包含普通函数，而在后者的内部访问前者，方法的this被普通函数的this掩盖。  
+解决方案：  
+①that=this 把this赋值给变量that  
+②bind() 使用bind()给回调函数的this绑定固定值，即函数的this。  
+③forEach()的thisValue 在回调函数后提供第二个参数，该参数成为回调函数的this。  
+### 第二层：对象间的原型关系  
+#### 对象间的原型关系
+1.继承：当访问属性时，JavaScript首先从本对象中查找，接着是原型，以及原型的原型，以此类推。  
+2.覆写：前者的属性最先被找到，它隐藏了后者的属性，这样后者的属性就不能被访问了。  
+3.通过原型在对象间共享数据：多个对象可以有相同的原型，这个原型持有所有的共享属性。数据保存在原型链的第一对象中，而方法保存在后面的对象中。  
+4.获取和设置原型  
+①使用给定prototype创建新对象  
+Object.create(proto,propDescObj?)  
+②读取对象原型  
+Object.getPrototypeOf(obj)  
+③检查一个对象是否是另一个对象的原型（检查方法的接收者是否是obj的原型）    
+Object.prototype.isPrototypeOf(obj)  
+④找到定义属性的对象  
+5.__proto__   
+注：__proto__ 不属于ECMAScript 5标准，它将成为ECMAScript 6的一部分。  
+检测引擎是否支持特殊属性__proto__：Object.getPrototypeOf({__proto__:null})===null  
+6.设置和删除仅影响自有属性  
+①设置属性  
+创建一个自有属性，即使已存在继承了该key的属性。  
+②删除继承的属性  
+只能删除自有属性。  
+③在原型链的任何位置改变属性  
+找到拥有这个属性的对象，然后改变这个对象的相应属性。  
+#### 遍历和检测属性（受继承和枚举的影响）  
+1.列出自有的属性键  
+只列出可枚举的属性键：  
+Object.getOwnPropertyNames(obj) 返回obj的所有自有的属性键。   
+Object.keys(obj) 返回obj的所有可枚举的属性键。  
+2.列出所有的属性键：  
+①使用循环  
+②实现一个函数，遍历所有属性  
+3.检测属性是否存在  
+propKey in obj  
+如果obj拥有一个键为propKey的属性，则返回true。  
+Object.prototype.hasOwnproperty(propKey)  
+如果接受者拥有一个键为propKey的自有属性，则返回true。  
+4.枚举的影响：  
+影响for-in循环和Object.keys()  
+for-in循环遍历所有可枚举属性的键，包括继承来的属性的键:  
+for (var x in obj) console. log(x);  
+//objEnunTrue  
+//protoEnun True  
+object.keys()返回所有自有(非继承)可枚举属性的键:  
+ 0bject .keys(obj)  
+//[ ' objEnunTrue' ]  
+继承的影响：  
+只有for-in循环和in操作符和继承有关  
+计算对象自有属性的个数  
+对象没有类似length或size的方法，因此需要使用下面这种方式:  
+object. keys( obj). length  
+#### 遍历自有属性  
+遍历属性键：  
+①结合for-in和hasOwnProperty()  
+for (var key in obj) {  
+if (0bject .prototype .hasOwnProperty.call(obj, key)) {  
+console. log(key);  
+}  
+②Object. keys ()或0bj ect . getOwnPropertyNames ()与forEach()结合遍历数组:  
+var obj = { first: 'John', last: 'Doe' };  
+// Visit non- inheri ted enunerable keys  
+0bject. keys(obj). forEach(function (key) {  
+console. log(key);   
+});  
+遍历属性值或键值对：  
+遍历所有的键，然后用每个键获得对应的值。  
+#### 访问器  
+1.通过对象字面量定义访问器  
+2.通过属性描述符定义访问器  
+通过属性描述符指定getter和setter  
+3.访问器和继承  
+getter和setter继承自原型  
+#### 属性特性和属性描述符  
+1.属性特性  
+[[Value]]持有属性的值，即它的数据。  
+[[Writable]]持有布尔类型的值，表示属性值是否可以改变。  
+访问器具有的特性:  
+[[Get]] 持有getter, 读取属性时调用的函数。该函数计算读取的结果。  
+[[Set]] 持有setter, 为属性设置值时调用的函数。该函数接收设置的值作为
+参数。  
+所有的属性都有如下特性:  
+[[Enumerable]]持有一个布尔值。设置一个属性不可枚举，那么在某些操作中
+会隐藏此属性。  
+[[Configurable]]持有一个布尔值。如果它是false,那么不能删除.  
+默认值：  
+[[Value]]：undefined  
+[[Get]]:undefined  
+[[Set]]:undefined  
+[[Writable]]:false  
+[[Enumerable]]:false  
+[[Configurable]]:false  
+2.属性描述符  
+用于编程处理特性的一种数据结构，它是一个编码属性特性的对象   
+3.通过描述符获取和定义属性  
+①获取属性：一个属性的所有特性都通过一个描述符返回。  
+②定义属性：取决于该属性是否已经存在。  
+如果不存在：创建一个新的属性，特性由描述符指定，如果描述符中没有特性对应的属性，则使用默认值。  
+如果存在：更新描述符指定的属性特性，如果描述符中的属性没有对应的特性，则属性不变。  
+Object.getOwnpropertyDescriptor(obj,propKey)  
+返回obj对象的propKey键自有属性描述符，如果没有该属性，则返回undefined.  
+Object.defineproperty(obj,propKey,propDesc)  
+创建或改变obj对象的propKey键的属性，并通过propDesc指定这个属性的特性，会返回修改后的对象。  
+Object.defineProperties(obj,propDescObj)  
+propDesc0bj 的每个属性都持有一个属性描述符。属性的键和值告诉0bject . defineProperties创建或改变obj的哪些属性。  
+Object.create(proto,propDescObj?)  
+首先，创建原型为proto的对象。然后,如果指定了可选参数propDesc0bj,用类似object.defineProperties 的同样方式给对象添加属性。最后，返回处理结果。  
+4.复制对象  
+创建一个对象完全相同的拷贝：  
+①拷贝必须具有与原对象相同的原型  
+②拷贝必须具有与原对象相同的属性和特性  
+function copy0bject(orig) {  
+// 1. copy has sane prototype as orig  
+var copy = object . create(0bject . getPrototype0f(orig));  
+// 2. copy has all of orig's properties  
+copyOwnPropertiesFron(copy, orig);  
+return copy;  
+}  
+这个函数把属性从orig复制到copy:  
+function copyOwnPropertiesFrom(target, source) {  
+object . getOwnPropertyNanes(source) // (1)  
+. forEach( function(propkey) { // (2) .  
+var desc = 0bject . getOwnProper tyDescriptor(source, propKey); // (3)  
+object . defineProper ty(target, propKey, desc); // (4)  
+});  
+return target;  
+};  
+步骤：  
+(1)获得source 所有自有属性键的数组。  
+(2)遍历这些键。  
+(3)获取属性描述符。  
+(4)使用属性描述符创建target 的自有属性。  
+5.属性：定义与赋值  
+①通过defineProperty ()和defineProperties()定义属性  
+②通过=给属性赋值。  
+注：这两种情况都会完全忽略原型链  
+给属性prop赋值意味着改变已存在的属性  
+6.继承的只读属性不能被赋值  
+7.枚举性  
+枚举的主要目的：判断for-in循环中的哪些属性应该忽略。  
+枚举性影响：  
+①for-in循环  
+②Object.keys()  
+③JSON-stringify()  
+注：通常可以忽略枚举性，且应该避免使用for-in循环。  
+不应该给内置原型和对象添加属性。  
+9.保护对象  
+①防止扩展 Object.preventExtensions(obj)  
+检测对象是否可以扩展：Object.isExtensible(obj)  
+②封闭  
+密封：Object.seal(obj)  
+判断一个对象是否封闭：Object.isSealed(obj)  
+③冻结  
+执行冻结：Object.freeze(obj)  
+检测一个对象是否被冻结：Object.isFrozen(obj)  
+### 第三层：构造函数  
+#### 构造函数————实例工厂  
+数据是由实例指定的，并存储在实例对象的自有属性中  
+行为被所有的实例所共享，它们公用一个带有方法的原型对象  
+构造函数是通过new操作符调用的函数，名字以大写字母开头：  
+function Person(name){  
+  this.name=name;  
+}  
+Person.prototype中的对象成为Person所有实例的原型：  
+Person.prototype.describe=function(){  
+  return 'Person named'+this.name;  
+ };  
+new操作符执行步骤：  
+①设置行为：创建一个新对象，其原型为Person.prototype.  
+②设置数据：Person接受对象作为隐式参数this，并添加实例属性。  
+1.JavaScript中new操作符的实现  
+function newOperator(Constr, args) {  
+var thisValue = object . create(Constr . prototype);// (1)   
+var result = Constr .apply(thisValue, args);    
+if (typeof result === 'object' & result !== null) {    
+return result; // (2)  
+}  
+return thisValue;  
+2.两个原型  
+原型一：原型关系  
+一个对象可以是另一个对象的原型:   
+var proto = {};    
+var obj = object. create(proto);  
+object . getPrototype0f(obj) === proto   
+//true  
+proto 是obj的原型。  
+原型二：prototype属性的值  
+每个构造函数C都有一个prototype 属性，它指向一个对象。该对象成为构造函数C的所有实例的原型:  
+function C() {}  
+ object . getPrototype0f(new C()) === C. prototype  
+//true  
+3. 实例的constructor属性  
+默认每个函数C包含一个实例原型对象C.prototype, 它的constructor属性指回C:  
+function C() {}  
+C.prototype .constructor === C   //true  
+因为每个实例都从原型中继承了constructor 属性，所以你可以使用它得到实例的构造函数。  
+var o=new C();  
+o.constructor  //[Function: C]  
+(1)constructor属性的用例  
+①切换对象的构造函数  
+这个方法只检测给定构造函数的直接实例。相比之下, instanceof既检测直接实例，也检测所有子构造函数的实例。  
+②确定对象的构造函数名  
+例如:   
+> function Foo() {}  
+> var f = new Foo();  
+> f.constructor.name   //' Foo'  (不是所有的JS引擎都支持函数的name属性)  
+③创建相似对象  
+function Constr() {}  
+var x = new Constr();  
+var y = new x.constructor();  
+console. log(y instanceof Constr); // true  
+对象y和x有相同的构造函数  
+这个技巧可用于子构造函数( subconstructors)实例的方法，且想要创建一个和this相似的新实例。这样就不能使用一个固定的构造函数:  
+SuperConstr.prototype.createCopy = function () {  
+return new this . constructor(...);  
+};  
+④指向父构造函数  
+一些继承库把父构造函数(superprototype) 赋值给子构造函数( subconstructor)的一个属性。例如，YUI 框架通过Y.extend提供子类:  
+function Super() {  
+}  
+function Sub() {  
+Sub . superclass . constructor . call(this); // (1)  
+}  
+Y. extend(Sub, Super );  
+行(1)执行的调用，是因为extend 把Sub. superclass设置为Super.prototype。正是由于有了constructor 属性，你才可以把父构造函数(superconstructor)作为方法来调用。  
+注：C.prototype.constructor===C  
+4. instanceof运算符  
+value instanceof Constr  
+它是检测Constr. prototype是否在value的原型链上。因此，下面的两个表达式是等价的:  
+value instanceof Constr   
+Constr.prototype.isPrototype0f(value)  
+例：  
+> {} instanceof object  
+true  
+> [] instanceof Array /1 constructor of []  
+true  
+> [] instanceof 0bject /1 super-constructor of[]  
+true  
+> new Date() instanceof Date  
+true  
+> new Date() instanceof object  
+true  
+正如所料，instanceof 对基本类型的值总是false:  
+> 'abc' instanceof object  
+false  
+> 123 instanceof Number  
+false  
+最后，如果instanceof的右边不是函数，它会抛出异常:  
+> [] instanceof 123  
+TypeError: Expecting a functton in instanceof check  
+几乎所有的对象都是object的实例，因为Object. prototype在这些对象的原型链上。但也有对象不属于这种情况。下面有两个例子:  
+> Object. create( null) instanceof Object  
+false  
+> 0bject . prototype instanceof object  
+false  
+下面是没有原型的对象  
+> object . getPrototype0f(Object . create(null))  
+null  
+> 0bject . getPrototype0f(0bject . prototype)   
+null  
+但typeof 可以正确地把这些对象归类为对象:  
+> typeof 0bject .create(null)  
+' object'  
+> typeof object . prototype  
+'object'   
+5. 实现构造函数的小技巧  
+①防止遗漏new：严格模式  
+如果你在使用构造函数时忘记了new, 那么该函数会作为一个普通函数调用，而不是构造函数。在宽松模式下，你不会得到实例而是创建了全局变量。不幸的是，发生这一切并不会有任何警告。而用严格模式就会出现异常警告。  
+②从构造函数返回任意对象  
+在JavaScript中，你可以简单地从构造函数中返回任何需要的对象。  
+#### 原型属性中的数据  
+1. 对于实例属性，避免使用带初始值的原型属性  
+①不应共享默认值  
+②根据需要创建实例属性  
+2. 避免非多态的原型属性  
+如果相同的属性(相同的键、相同语义，通常有不同的值)，在几个原型中同时存在，称为多态( polymorphic)。那么通过实例读取属性的结果是由实例原型动态决定的。原型属性不用于多态情况时，可以替换为变量(这可以更好地反映非多态性)。  
+例如，你可以在原型属性中存储一个常量，并通过this访问:  
+function Foo() {}   
+Foo. prototype. FACTOR = 42;  
+Foo. prototype . compute = function (x) {  
+return x * this . FACTOR;  
+}；  
+这个常量不是多态的。因此你也可以通过变量访问:  
+// This code should be inside an IIFE or a module  
+function Foo() {}  
+var FACTOR = 42;  
+Foo . prototype. compute = function (x) {  
+return x * FACTOR;  
+};  
+3. 多态的原型属性  
+下面是一个用不可变数据设置多态原型属性的例子。通过原型属性标记的构造函数实例，你可以区分不同构造函数生成的实例。  
+function ConstrA() { }  
+ConstrA. prototype .TYPE_ NAME = 'ConstrA';  
+function ConstrB() { }  
+ConstrB. prototype.TYPE_ NAME = ' ConstrB' ;  
+#### 保持数据私有性  
+JavaScript没有专门的方式来管理对象的私有数据。以下是3种技术来突破这种局限:  
+构造函数环境中的私有数据;  
+带有特殊标记键的属性中的私有数据;  
+具体化键的属性中的私有数据。  
+1. 构造函数环境中的私有数据  
+在调用构造函数时，创建了两个东西:构造函数实例和环境。该实例由构造函数初始化，而该环境保持了构造函数的参数和局部变量。每个在构造函数内部创建的函数(包括方法)都会保存此环境(创建函数时的环境)的引用。由于保存了此环境的引用，即使在构造函数执行结束后，也仍然可以访问这个环境。这种函数和环境的结合称为闭包(闭包:使得函数可以维持其创建时所在的作用域)。构造函数的环境是独立于实例的数据存储，且与实例关联只因为这两个是同时创建的。为了正确连接实例和环境，我们必须使函数在这两个范围中都可用。使用Douglas Crockford的技术，实例可以有三种值与之关联：  
+（1）公有属性  
+存储在属性中的值(实例或它的原型)是可以公共访问的。  
+（2）私有值  
+存储在环境中的数据和函数是私有的————只有构造函数和构造函数创建的函数可以访问。  
+构造函数的环境由参数和局部变量组成。它们只能从构造函数内部访问，因此被实例所私有:  
+（3）特权方法  
+私有函数可以访问公有属性，但原型中的公有方法不能访问私有数据。因此我们需要特权方法————实例中的共有方法。特权方法是公有的，且可以被任何实例调用，而这种方法也可以访问私有值，因为它们是在构造函数中创建的。  
+· Crockford私有模式的利弊  
+在使用Crockford 私有模式时，有几点需要考虑:  
+(1)它不是很优雅  
+(2)它是完全安全的  
+(3)它可能比较慢  
+(4)它会消耗更多的内存  
+2. 使用标记的键的属性保存私有数据  
+通过带有标记的属性键实现私有性有一些利弊:  
+(1)它提供了更自然的编码风格  
+(2)它污染了属性的命名空间  
+(3)可以从“外部”访问私有属性  
+(4)它会导致键的冲突  
+3. 使用具体化键的属性保存私有数据  
+私有属性命名约定的一个问题是可能导致属性键冲突(例如，构造函数中的键和子构造函数中的键，或来自mixin 的键和来自构造函数的键)。你可以使用较长的键避免冲突,例如,包含构造函数的名字：私有属性_ buffer将称为_ StringBuilder_ buffer。 如果这种键对你来说太长，那么可以选择把
+键具体化，存储在变量中:var KEY__BUFFER = ' _ StringBuilder_ buffer';   
+4. 通过IFE保持全局数据私有  
+①把私有全局数据存储于一个单例对象  
+②保持全局数据对所有构造函数私有  
+③把全局数据放在一个方法中  
+### 第四层：构造函数之间的继承  
+
 
 
 
