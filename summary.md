@@ -1601,9 +1601,9 @@ o.constructor  //[Function: C]
 这个方法只检测给定构造函数的直接实例。相比之下, instanceof既检测直接实例，也检测所有子构造函数的实例。  
 ②确定对象的构造函数名  
 例如:   
-> function Foo() {}  
-> var f = new Foo();  
-> f.constructor.name   //' Foo'  (不是所有的JS引擎都支持函数的name属性)  
+function Foo() {}  
+var f = new Foo();  
+f.constructor.name   //' Foo'  (不是所有的JS引擎都支持函数的name属性)  
 ③创建相似对象  
 function Constr() {}  
 var x = new Constr();  
@@ -1619,9 +1619,9 @@ return new this . constructor(...);
 function Super() {  
 }  
 function Sub() {  
-Sub . superclass . constructor . call(this); // (1)  
+Sub.superclass.constructor.call(this); // (1)  
 }  
-Y. extend(Sub, Super );  
+Y.extend(Sub, Super );  
 行(1)执行的调用，是因为extend 把Sub. superclass设置为Super.prototype。正是由于有了constructor 属性，你才可以把父构造函数(superconstructor)作为方法来调用。  
 注：C.prototype.constructor===C  
 4. instanceof运算符  
@@ -1630,39 +1630,26 @@ value instanceof Constr
 value instanceof Constr   
 Constr.prototype.isPrototype0f(value)  
 例：  
-> {} instanceof object  
-true  
-> [] instanceof Array /1 constructor of []  
-true  
-> [] instanceof 0bject /1 super-constructor of[]  
-true  
-> new Date() instanceof Date  
-true  
-> new Date() instanceof object  
-true  
+{} instanceof object  //true  
+[] instanceof Array /1 constructor of []  //true  
+[] instanceof 0bject /1 super-constructor of[]  //true  
+new Date() instanceof Date  //true  
+new Date() instanceof object  //true  
 正如所料，instanceof 对基本类型的值总是false:  
-> 'abc' instanceof object  
-false  
-> 123 instanceof Number  
-false  
+'abc' instanceof object  //false  
+123 instanceof Number  //false  
 最后，如果instanceof的右边不是函数，它会抛出异常:  
-> [] instanceof 123  
+[] instanceof 123  
 TypeError: Expecting a functton in instanceof check  
 几乎所有的对象都是object的实例，因为Object. prototype在这些对象的原型链上。但也有对象不属于这种情况。下面有两个例子:  
-> Object. create( null) instanceof Object  
-false  
-> 0bject . prototype instanceof object  
-false  
+Object. create( null) instanceof Object  //false  
+0bject . prototype instanceof object  //false  
 下面是没有原型的对象  
-> object . getPrototype0f(Object . create(null))  
-null  
-> 0bject . getPrototype0f(0bject . prototype)   
-null  
+object . getPrototype0f(Object . create(null))  //null  
+0bject . getPrototype0f(0bject . prototype)   //null  
 但typeof 可以正确地把这些对象归类为对象:  
-> typeof 0bject .create(null)  
-' object'  
-> typeof object . prototype  
-'object'   
+typeof 0bject .create(null)  //' object'  
+typeof object . prototype  //'object'   
 5. 实现构造函数的小技巧  
 ①防止遗漏new：严格模式  
 如果你在使用构造函数时忘记了new, 那么该函数会作为一个普通函数调用，而不是构造函数。在宽松模式下，你不会得到实例而是创建了全局变量。不幸的是，发生这一切并不会有任何警告。而用严格模式就会出现异常警告。  
