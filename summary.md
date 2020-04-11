@@ -1714,6 +1714,95 @@ JavaScript没有专门的方式来管理对象的私有数据。以下是3种技
 ②保持全局数据对所有构造函数私有  
 ③把全局数据放在一个方法中  
 ### 第四层：构造函数之间的继承  
+#### 如何继承构造函数  
+给定构造函数Super，我们如何编写新的构造函数Sub， 它除了拥有Super 的所有特性，还增加了一些自己的特性。  
+1. 继承实例属性  
+实例的属性是在它自己的构造函数中设置的，因此继承父构造函数的实例属性会涉及调用其父构造函数:  
+function Sub(prop1, prop2, prop3, prop4) {  
+Super .call(this, prop1, prop2); // (1)   
+this.prop3 = prop3; // (2)  
+this .prop4 = prop4; // (3)  
+}  
+通过new调用Sub时，它的隐式参数this指向一个新的实例。它首先把该实例传给Super (1)， Super添加自己的实例属性。之后，Sub设置它自己的实例属性(2,3)。该技巧是，不要通过new调用Super,因为这样会创建一个新的Super实例。相反，我们把Super作为普通函数调用，并传递当前(sub) 实例作为this的值。  
+2. 继承原型属性  
+共享的属性，例如方法会保存在实例的原型中。因此我们需要为Sub.prototype找到一种方法来继承Super.prototype的所有属性。这个解决方法是指定Sub.prototype的原型为Super.prototype  
+3. 确保instanceof正常工作  
+“确保instanceof正常工作”意味着每个Sub的实例必须也是Super的实例。  
+4. 覆写方法  
+我们通过添加Sub.prototype.methodB的同名方法，可以覆写Super.prototype的方法  
+5. 父调用  
+一个方法的主对象是一个对象，它具有一个属性且该属性的值指向这个方法。例如，Sub. prototype.methodB的主对象是Sub.prototype。父调用foo 方法包括三个步骤。  
+(1)从(原型中的)当前方法中的主对象“之后”，开始查找。  
+(2)查找名为foo的方法。  
+(3)用当前的this调用此方法。基本原理是，父方法(supermethod)必须作为当前方法使用同一实例调用;父方法必须可以访问同一实例的属性。  
+6. 避免硬编码父构造函数的名字  
+通过把父原型赋值给Sub的一个属性来避免这个问题。  
+Sub._ super = Super . prototype;
+然后，如下这样调用父构造函数和父方法:  
+function Sub(prop1, prop2, prop3, prop4) {  
+   Sub._ super .constructor .call(this, prop1, prop2);  
+   this.prop3 = prop3;  
+   this .prop4 = prop4;  
+}  
+Sub . prototype .nethodB = function (x, y) {   
+   var superResult = Sub._ super .methodB .call(this, x, y);  
+   return this.prop3 + ' ' + superResult;  
+}  
+设置Sub._ super通常由工具函数处理，并保持子原型到父原型连接。  
+#### 所有对象的方法  
+object. prototype几乎在所有的对象的原型链上:  
+> Object . prototype . isPrototype0f({})  
+true  
+> object . prototype. isPrototype0f([ ])  
+true  
+> Object. prototype . isPrototype0f( /xyz/)  
+true  
+1. 转换为原始值  
+（1）把对象转换为基本类型  
+①Object.prototype.toString():  
+({ first: ' John ', last: 'Doe' }. toString())  //'[object object]'  
+[ 'a',, 'b', 'c' ].toString()   //a,b,c'  
+②Object.prototype.valueof()  
+这个方法是把对象转换为数字的推荐方式。默认实现会返回this:  
+var obj={};  obj.value0f() === obj     //true  
+value0f被包装的构造函数覆写，返回包装后的基本类型:   
+new Number(7).value0f()    //7  
+转换为数字和字符串(隐式或显式)建立在转换为基础类型的基础上。这就是为什么可以使用上述两种方法来配置那些转换。转换为数字推荐使用valueOf()。   
+{value0f:function(){return5}}    //15  
+转换为字符串推荐使用toString():  
+String({ toString: function () { return 'ME' } })   //'Result: ME'  
+不能设置转换为布尔类型:对象总被认为是true  
+2. Object.prototype.toLocaleString()  
+这个方法返回特定于本地语言环境的代表对象的字符串。默认实现调用toString()。大多数引擎都支持这个方法。  
+3. 原型式继承和属性  
+下面的方法用于原型式继承和属性:  
+Object.prototype.isPrototypeOf (obj)  
+如果接收者属于obj原型链的一部分，则返回true:   
+var proto={};  
+var obj = object.create(proto);  
+proto.isPrototype0f(obj)   //true  
+obj.isPrototype0f(obj)     //false  
+  
+Object. prototype.hasOwnProperty (key)  
+如果this拥有键为key的属性，则返回true。 “自有”意味着该属性存在于这个对象中，而不存在于该对象的任何原型中。  
+Object.prototype.propertyIsEnumerable (propKey)  
+如果接收者具有键为propKey的可枚举属性,则返回true,否则返回false  
+#### 泛型方法：借用原型方法  
+有时实例原型具有的方法除了对继承自它的对象有用，对很多其他的对象也有用。下面阐述了如何不继承而使用原型的方法。  
+1. 通过字面量访问Object.prototype和Array.prototype  
+2. 调用泛型方法  
+①使用apply()
+②对字符串（不是数组）应用数组方法join()  
+③对字符串应用数组方法map()  
+④对非字符串应用字符串方法  
+⑤对伪数组调用数组方法  
+3. 类似数组的对象和泛型方法  
+①arguments是一个重要的类数组对象，看起来像是一个数组，但不能使用任何数组方法  
+②类数组的字符串  
+'abc'[1]       //'b'  
+'abc'.length   //3  
+
+
 
 
 
