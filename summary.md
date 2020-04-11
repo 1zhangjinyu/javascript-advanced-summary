@@ -1797,10 +1797,49 @@ Object.prototype.propertyIsEnumerable (propKey)
 ④对非字符串应用字符串方法  
 ⑤对伪数组调用数组方法  
 3. 类似数组的对象和泛型方法  
-①arguments是一个重要的类数组对象，看起来像是一个数组，但不能使用任何数组方法  
-②类数组的字符串  
+（1）①arguments是一个重要的类数组对象，看起来像是一个数组，但不能使用任何数组方法  
+     ②类数组的字符串  
 'abc'[1]       //'b'  
 'abc'.length   //3  
+注：类数组对象的元素必须通过方括号和从0开始的整型索引访问。所有方法需要可读访问，且另外一些方法还需要可写访问。注意所有对象都支持这种索引:方括号中的索引转化为字符串作为键来查找属性的值。  
+var obj={'θ':'abc'};  
+obj[0]     //'abc'  
+类数组对象必须具有length 属性，值是它的元素个数。一些方法需要length是可变的(例如，reverse())。 不变长度的值(例如，字符串)不能使用这些方法。  
+（2）用于类数组对象的模式  
+把类数组对象转化为数组:  
+var arr = Array. prototype. slice .call(arguments );  
+var copy = [ 'a', 'b' ].slice();  
+可以使用简单的for循环来遍历类数组对象中的所有元素:  
+function logArgs() {  
+   for (var i=0; i<arguments .Length; i++) {  
+   console. log(i+'. ' +arguments[i]);  
+   }  
+}  
+但也可以借用Array. prototype . forEach()  
+4. 所有泛型方法列表  
+①Array.prototype（concat、every、filter、forEach、indexOf、join、lastIndexof、map、pop、push、reduce、reduceRight、reverse、shift、slice、some、sort、splice、toLocaleString、toString、unshift）  
+②Date.prototype（toJSON）  
+③String.prototype（charAt、charCodeAt、concat、indexOf、lastIndexOf、localeCompare、match、replace、search、slice、split、substring、toLocaleLowerCase、toLocaleUpperCase、toLowerCase、toUpperCase）  
+#### 缺陷：Object作为Map使用  
+1. 检查一个属性是否存在  
+操作符in检查一个对象是否具有某个给定键的属性，而它也会检查继承的属性，如：  
+'ownProp' in obj     //true  
+我们需要检测可以忽略继承的属性。hasOwnProperty()可以实现，如:  
+obj.has0wnProperty('ownProp')   // true  
+2. 收集属性键  
+for—in方法会检查继承的可枚举属性  
+Object.keys()可以只列出自有属性  
+3. 获取属性值  
+我们可以选择点操作符或方括号操作符来读取属性的值。如果是存储在变量中的任意键，则不能使用点操作符。这样就只剩下方括号操作符，它会查找继承的属性  
+#### 对象的使用  
+（1）对象字面量  
+（2）点运算符（.）  
+（3）中括号运算符（[]）   
+（4）获取和设置原型  
+（5）属性的遍历和检测  
+（6）通过描述符获取和定义属性  
+（7）保护对象  
+（8）所有对象的方法
 
 
 
